@@ -11,10 +11,22 @@ import (
 	"strings"
 
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/text"
 )
+
+type MenuItem struct {
+	text string
+	id   string
+}
+
+type PageData struct {
+	Menu []MenuItem
+	Body template.HTML
+}
 
 var (
 	addr = flag.String("addr", "0.0.0.0:8080", "Address for listening")
@@ -38,8 +50,22 @@ var (
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </header>
 <body>
-<div class="container">
-{{.}}
+<nav class="navbar fixed-top navbar-light bg-light">
+  <a class="navbar-brand" href="#">Fixed top</a>
+</nav>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+      <a class="nav-item nav-link" href="#">Features</a>
+      <a class="nav-item nav-link" href="#">Pricing</a>
+      <a class="nav-item nav-link disabled" href="#">Disabled</a>
+    </div>
+  </div>
+<div class="container pt-8">
+{{.Body}}
 </div>
 </body>
 </html>
@@ -48,22 +74,43 @@ var (
 )
 
 func markdownHandler(w http.ResponseWriter, r *http.Request) {
+	var page PageData
+
 	source, err := ioutil.ReadFile(*root + r.URL.Path)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
+	// Render the Markdown to HTML in the buffer
 	var buf bytes.Buffer
-	if err := Markdown.Convert(source, &buf); err != nil {
+	n := Markdown.Parser().Parse(text.NewReader(source))
+	if err := Markdown.Renderer().Render(&buf, source, n); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	page.Body = template.HTML(buf.Bytes())
 
-	w.Header().Set("Content-Type", "text/html")
-	if err := Template.Execute(w, template.HTML(buf.Bytes())); err != nil {
+	// Walk nodes to find Headers.  Add Headers to the menu
+	n = n.FirstChild()
+	for n != nil {
+		h, ok := n.(*ast.Heading)
+		if ok && h.Level == 1 {
+			id, found := h.Attribute([]byte("id"))
+			if found {
+				page.Menu = append(page.Menu, MenuItem{
+					string(h.Text(source)),
+					string(id.([]byte)),
+				})
+			}
+		}
+
+		n = n.NextSibling()
+	}
+
+	// Finally write it all to the client
+	if err := Template.Execute(w, page); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 	}
 
 }
