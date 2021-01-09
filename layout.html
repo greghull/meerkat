@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+		<style>
+		 nav >  a{
+			 color: white !important;
+		 }
+		</style>
+	</head>
+	<body>
+		<nav class="navbar sticky-top navbar-light bg-dark">
+			<a class="nav-item nav-link"  href="#home">Home</a>
+			{{range .Menu}}
+			<a class="nav-item nav-link" href="#{{.ID}}">{{.Text}}</a>
+			{{end}}
+		</nav>
+
+		<div>
+			<div class="section" id="home">
+				<div style="position:relative;padding-top:44%;">
+					<iframe src="//embed.gettyimages.com/embed/970466758?et=RxwsGnlPS1pY9X98ZIut7A&tld=com&sig=Nu6WMwa0UwmM0RkK-LhlENBooSzF4BBMTbh96Qzxf54=&caption=false&ver=1" frameborder="0"
+							style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+				</div>
+			</div>
+			<!-- Begin Markdown converted content -->
+
+			{{.Body}}
+
+			<!-- End Markdown content -->
+		</div>
+
+		<script
+			src="https://code.jquery.com/jquery-3.5.1.min.js"
+				 integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+			crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+		<script>
+		 $(document).ready(function(){
+			 $("a").click(function(ev){
+				 // hide all sections
+				 $(".section").hide()
+				 // show the seciton specified by the hash
+				 $(ev.target.hash).show()
+			 });
+		 });
+
+		 // When loading the page, only show the part specified by the #hash
+		 $(".section").hide()
+		 var hash = window.location.hash;
+		 if(hash) {
+			 $(hash).show()
+		 } else {
+			 $("$home").show()
+		 }
+		</script>
+
+	</body>
+</html>

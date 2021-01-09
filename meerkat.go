@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -19,8 +20,8 @@ import (
 )
 
 type MenuItem struct {
-	text string
-	id   string
+	Text string
+	ID   string
 }
 
 type PageData struct {
@@ -29,12 +30,40 @@ type PageData struct {
 }
 
 var (
-	addr = flag.String("addr", "0.0.0.0:8080", "Address for listening")
-	root = flag.String("root", ".", "Root directory for serving files")
+	addr  = flag.String("addr", "0.0.0.0:8080", "Address for listening")
+	root  = flag.String("root", ".", "Root directory for serving files")
+	templ = flag.String("layout", "layout.html", "Layout template for Markdown pages")
 
 	MarkdownSuffix = regexp.MustCompile(`(?i).*\.md$`)
-	Markdown       = goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.Typographer),
+
+	htmlText = `
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<nav class="navbar fixed-top navbar-light bg-light">
+{{range .Menu}}
+<a class="nav-item nav-link" href="#{{.ID}}">{{.Text}}</a>
+{{end}}
+</nav>
+<div class="container pt-8" style="margin-top:50px;">
+{{.Body}}
+</div>
+</body>
+</html>
+`
+	defaultTemplate = template.Must(template.New("html").Parse(htmlText))
+)
+
+func markdownHandler(w http.ResponseWriter, r *http.Request) {
+	var markdown = goldmark.New(
+		goldmark.WithExtensions(extension.GFM,
+			extension.Typographer,
+			NewHeaderDivExtension(),
+		),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
 		),
@@ -42,38 +71,6 @@ var (
 			html.WithUnsafe(),
 		),
 	)
-
-	htmlText = `
-<html>
-<header>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</header>
-<body>
-<nav class="navbar fixed-top navbar-light bg-light">
-  <a class="navbar-brand" href="#">Fixed top</a>
-</nav>
-<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-    <div class="navbar-nav">
-      <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
-      <a class="nav-item nav-link" href="#">Features</a>
-      <a class="nav-item nav-link" href="#">Pricing</a>
-      <a class="nav-item nav-link disabled" href="#">Disabled</a>
-    </div>
-  </div>
-<div class="container pt-8">
-{{.Body}}
-</div>
-</body>
-</html>
-`
-	Template = template.Must(template.New("html").Parse(htmlText))
-)
-
-func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	var page PageData
 
 	source, err := ioutil.ReadFile(*root + r.URL.Path)
@@ -84,8 +81,8 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Render the Markdown to HTML in the buffer
 	var buf bytes.Buffer
-	n := Markdown.Parser().Parse(text.NewReader(source))
-	if err := Markdown.Renderer().Render(&buf, source, n); err != nil {
+	n := markdown.Parser().Parse(text.NewReader(source))
+	if err := markdown.Renderer().Render(&buf, source, n); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -108,8 +105,13 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 		n = n.NextSibling()
 	}
 
+	t, err := template.ParseGlob(*templ)
+	if err != nil {
+		fmt.Println("Using built-in template.")
+		t = defaultTemplate
+	}
 	// Finally write it all to the client
-	if err := Template.Execute(w, page); err != nil {
+	if err := t.Execute(w, page); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
