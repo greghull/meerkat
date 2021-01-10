@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"flag"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
+	"os"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -34,9 +37,11 @@ type PageData struct {
 }
 
 var (
-	addr  = flag.String("addr", "0.0.0.0:8080", "Address for listening")
-	root  = flag.String("root", ".", "Root directory for serving files")
-	templ = flag.String("layout", "layout.html", "Layout template for Markdown pages")
+	outputDir = flag.String("output", ".", "Directory to write HTML files")
+	sourceDir = flag.String("source", ".", "Directory to watch for Markdown files")
+	addr      = flag.String("addr", "0.0.0.0:8080", "Address for listening")
+	root      = flag.String("root", ".", "Root directory for serving files")
+	templ     = flag.String("layout", "layout.html", "Layout template for Markdown pages")
 
 	MarkdownSuffix = regexp.MustCompile(`(?i).*\.md$`)
 
@@ -138,6 +143,95 @@ func router(w http.ResponseWriter, r *http.Request) {
 		http.FileServer(http.Dir(*root)).ServeHTTP(w, r)
 	}
 }
+
+
+func newMarkdown() goldmark.Markdown {
+	 return goldmark.New(
+		goldmark.WithExtensions(extension.GFM,
+			extension.Typographer,
+			NewHeaderDivExtension(),
+		),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithUnsafe(),
+		),
+	)
+}
+func buildMenu(n ast.Node, source []byte) []MenuItem {
+	var menu []MenuItem
+
+		// Walk nodes to find Headers.  H1 elements will be added to the Nav menu
+	n = n.FirstChild()
+	for n != nil {
+		h, ok := n.(*ast.Heading)
+		if ok && h.Level == 1 {
+			id, found := h.Attribute([]byte("id"))
+			if found {
+				menu = append(menu, MenuItem{
+					string(h.Text(source)),
+					string(id.([]byte)),
+				})
+			}
+		}
+
+		n = n.NextSibling()
+	}
+
+	return menu
+	
+}
+
+func transform(w io.Writer, r io.Reader) error {
+	var page PageData
+
+	source,err := ioutil.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+		// Render the Markdown to HTML in the buffer
+	var buf bytes.Buffer
+	markdown := newMarkdown()
+	n := markdown.Parser().Parse(text.NewReader(source))
+	if err := markdown.Renderer().Render(&buf, source, n); err != nil {
+		return err
+	}
+	page.Body = template.HTML(buf.Bytes())
+	page.Menu = buildMenu(n, source)
+	
+	// Attempt to use a template file, otherwise use the built-in template
+	t, err := template.ParseGlob(*templ)
+	if err != nil {
+		t = defaultTemplate
+	}
+	// Finally write it all to the client
+	if err := t.Execute(w, page); err != nil {
+		return err
+	}
+	return nil
+}
+
+func md2html(filename string) error {
+	outFilename := MarkdownSuffix.ReplaceAllString(path.Base(filename), ".html")
+	outPath := path.Join(*outputDir, outFilename)
+	
+	mdFile,err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer mdFile.Close()
+
+	htmlFile,err := os.Create(outPath)
+	if err != nil {
+		return err
+	}
+	defer htmlFile.Close()
+
+	return transform(htmlFile, mdFile)
+}
+
 
 func main() {
 	flag.Parse()

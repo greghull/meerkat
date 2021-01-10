@@ -53,6 +53,7 @@ func (r *HTMLRenderer) renderHeading(w util.BufWriter, source []byte, node ast.N
 		if n.Level == 1 {
 			if r.headerCnt > 0 {
 				_, _ = w.WriteString("</div>")
+				r.headerCnt--
 			}
 			_, _ = w.WriteString(`<div class="container section" `)
 			w.WriteString(">\n")
@@ -82,6 +83,7 @@ func (r *HTMLRenderer) renderDocument(w util.BufWriter, source []byte, node ast.
 	// If we are finishing the document, and there is an open <div> from an H1 Header, then close it now
 	if !entering && r.headerCnt > 1 {
 		_, _ = w.WriteString("</div>")
+		r.headerCnt--
 	}
 	return ast.WalkContinue, nil
 }
