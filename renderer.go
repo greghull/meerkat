@@ -54,12 +54,15 @@ func (r *HTMLRenderer) renderHeading(w util.BufWriter, source []byte, node ast.N
 			if r.headerCnt > 0 {
 				_, _ = w.WriteString("</div>")
 			}
-			_, _ = w.WriteString(`<div class="container pt-3 section" `)
+			_, _ = w.WriteString(`<div class="container section" `)
+			w.WriteString(">\n")
+			r.headerCnt += 1
+			_, _ = w.WriteString(`<span class="anchor" `)
 			if n.Attributes() != nil {
 				html.RenderAttributes(w, node, html.HeadingAttributeFilter)
 			}
-			w.WriteString(">\n")
-			r.headerCnt += 1
+			_, _ = w.WriteString("></span>\n")
+
 		}
 		_, _ = w.WriteString("<h")
 		_ = w.WriteByte("0123456"[n.Level])
