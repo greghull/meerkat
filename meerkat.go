@@ -7,12 +7,11 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
+	"os"
 	"path"
 	"regexp"
-	"strings"
-	"os"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -39,11 +38,10 @@ type PageData struct {
 var (
 	outputDir = flag.String("output", ".", "Directory to write HTML files")
 	sourceDir = flag.String("source", ".", "Directory to watch for Markdown files")
-	addr      = flag.String("addr", "0.0.0.0:8080", "Address for listening")
-	root      = flag.String("root", ".", "Root directory for serving files")
 	templ     = flag.String("layout", "layout.html", "Layout template for Markdown pages")
+	doMinify = flag.Bool("minify", false, "Minify HTML output")
 
-	MarkdownSuffix = regexp.MustCompile(`(?i).*\.md$`)
+	MarkdownSuffix = regexp.MustCompile(`(?i)\.md$`)
 
 	// If No HTML template is found, this will be used be default.
 	htmlText = `
@@ -69,82 +67,6 @@ var (
 	defaultTemplate = template.Must(template.New("html").Parse(htmlText))
 )
 
-func markdownHandler(w http.ResponseWriter, r *http.Request) {
-	var markdown = goldmark.New(
-		goldmark.WithExtensions(extension.GFM,
-			extension.Typographer,
-			NewHeaderDivExtension(),
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-		),
-		goldmark.WithRendererOptions(
-			html.WithUnsafe(),
-		),
-	)
-	var page PageData
-
-	// Read in the source markdown
-	source, err := ioutil.ReadFile(*root + r.URL.Path)
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	// Render the Markdown to HTML in the buffer
-	var buf bytes.Buffer
-	n := markdown.Parser().Parse(text.NewReader(source))
-	if err := markdown.Renderer().Render(&buf, source, n); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	page.Body = template.HTML(buf.Bytes())
-
-	// Walk nodes to find Headers.  H1 elements will be added to the Nav menu
-	n = n.FirstChild()
-	for n != nil {
-		h, ok := n.(*ast.Heading)
-		if ok && h.Level == 1 {
-			id, found := h.Attribute([]byte("id"))
-			if found {
-				page.Menu = append(page.Menu, MenuItem{
-					string(h.Text(source)),
-					string(id.([]byte)),
-				})
-			}
-		}
-
-		n = n.NextSibling()
-	}
-
-	// Attempt to use a template file, otherwise use the built-in template
-	t, err := template.ParseGlob(*templ)
-	if err != nil {
-		t = defaultTemplate
-	}
-	// Finally write it all to the client
-	if err := t.Execute(w, page); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-}
-
-// Requests for Markdown files are sent to the markdownHandler,
-// all other requests are handled by http.FileServer
-func router(w http.ResponseWriter, r *http.Request) {
-	// Instead of looking for index.html pages, look for index.md pages
-	if strings.HasSuffix(r.URL.Path, "/") {
-		r.URL.Path += "index.md"
-	}
-
-	if MarkdownSuffix.MatchString(r.URL.Path) {
-		markdownHandler(w, r)
-	} else {
-		http.FileServer(http.Dir(*root)).ServeHTTP(w, r)
-	}
-}
-
-
 func newMarkdown() goldmark.Markdown {
 	 return goldmark.New(
 		goldmark.WithExtensions(extension.GFM,
@@ -159,6 +81,8 @@ func newMarkdown() goldmark.Markdown {
 		),
 	)
 }
+
+// Builds a menu from the H1 elements in the markdown document
 func buildMenu(n ast.Node, source []byte) []MenuItem {
 	var menu []MenuItem
 
@@ -183,6 +107,7 @@ func buildMenu(n ast.Node, source []byte) []MenuItem {
 	
 }
 
+// io pipe -- reads in Markdown, writes out HTML
 func transform(w io.Writer, r io.Reader) error {
 	var page PageData
 
@@ -202,17 +127,19 @@ func transform(w io.Writer, r io.Reader) error {
 	page.Menu = buildMenu(n, source)
 	
 	// Attempt to use a template file, otherwise use the built-in template
-	t, err := template.ParseGlob(*templ)
+	t, err := template.ParseFiles(*templ)
 	if err != nil {
 		t = defaultTemplate
 	}
-	// Finally write it all to the client
-	if err := t.Execute(w, page); err != nil {
-		return err
+
+	if *doMinify {
+	
 	}
-	return nil
+	// Finally write it all to the client
+	return t.Execute(w, page)
 }
 
+// Reads in the specified Markdown file and converts it to HTML
 func md2html(filename string) error {
 	outFilename := MarkdownSuffix.ReplaceAllString(path.Base(filename), ".html")
 	outPath := path.Join(*outputDir, outFilename)
@@ -229,17 +156,62 @@ func md2html(filename string) error {
 	}
 	defer htmlFile.Close()
 
+	log.Printf("Converting %s to %s\n", filename, outPath)
+
+
 	return transform(htmlFile, mdFile)
+}
+
+// Watches the source dir, non-recursively, for a file to be changed.
+// If the changed filed is a markdown file, then generate a matching
+// html file
+func watch() error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+
+	watcher.Add(*sourceDir)
+
+	for {
+		select {
+		case ev := <- watcher.Events:
+			log.Println(ev)
+			switch ev.Op {
+			case fsnotify.Create:
+				if MarkdownSuffix.MatchString(ev.Name) {
+					err = md2html(ev.Name)
+				}
+			case fsnotify.Rename:
+				if MarkdownSuffix.MatchString(ev.Name) {
+					err = md2html(ev.Name)
+				}
+			case fsnotify.Write:
+				if MarkdownSuffix.MatchString(ev.Name) {
+					err = md2html(ev.Name)
+				}
+			}
+			if err != nil {
+				log.Println(err)
+			}
+		case err := <- watcher.Errors:
+			return err
+		}
+	}
 }
 
 
 func main() {
 	flag.Parse()
-	if *root == "" {
-		*root = "."
+
+	for _, arg := range flag.Args() {
+		if	err := md2html(arg); err != nil {
+			log.Println(err)
+		}		
 	}
 
-	http.HandleFunc("/", router)
+	if err := watch(); err != nil {
+		log.Println(err)
+	}
 
-	log.Fatal(http.ListenAndServe(*addr, nil))
 }

@@ -1,10 +1,3 @@
-# Home
-
-![A Picture of Jane Goodall](goodall.jpg)
-
-
-
-
 # Biography
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
@@ -26,7 +19,25 @@ Pellentesque pretium dolor non mi molestie semper. Sed ultricies efficitur turpi
 
 
 
-# Goodall & the Chimpazees
+# Goodall & the Chimpanzees
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Morbi sed risus ut dui semper maximus. Nulla ipsum diam, feugiat a dapibus ut, mollis sit amet odio. 
+Nulla mattis nulla urna, ut scelerisque quam condimentum vel. Pellentesque faucibus augue quam, quis 
+lobortis nisl euismod malesuada. Proin id lacinia augue. Vestibulum semper risus in ex volutpat, 
+id malesuada turpis viverra. Nunc lorem mauris, congue at fringilla eget, ornare ac lacus.
+
+Donec viverra leo quis neque suscipit fermentum. Vivamus enim turpis, scelerisque non lacinia id, 
+scelerisque eu justo. Phasellus eleifend eget metus luctus interdum. Donec vehicula metus non ultrices 
+suscipit. Phasellus vel nunc luctus, viverra nisi at, lacinia odio. Nulla tincidunt metus nec aliquet 
+imperdiet. In hac habitasse platea dictumst. Nam non augue augue.
+
+Quisque rutrum quis velit eu ornare. Donec suscipit enim lectus, eget varius purus eleifend eu. 
+Sed tempor ac diam in ornare. Vestibulum non ipsum a purus commodo vulputate. Sed facilisis 
+tristique ultricies. Sed eu ornare nisi. Integer a rhoncus diam. Aliquam erat volutpat. Curabitur lacus nulla, 
+tincidunt commodo congue eget, elementum eu neque. Morbi condimentum fermentum turpis sed ultricies. 
+Pellentesque pretium dolor non mi molestie semper. Sed ultricies efficitur turpis sit amet rhoncus. 
+
 
 ## This is a subsection
 
@@ -51,15 +62,44 @@ Pellentesque pretium dolor non mi molestie semper. Sed ultricies efficitur turpi
 [1]:https://www.janegoodall.org/
 
 
+# Educating the World
 
-# Retirement
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Morbi sed risus ut dui semper maximus. Nulla ipsum diam, feugiat a dapibus ut, mollis sit amet odio. 
+Nulla mattis nulla urna, ut scelerisque quam condimentum vel. Pellentesque faucibus augue quam, quis 
+lobortis nisl euismod malesuada. Proin id lacinia augue. Vestibulum semper risus in ex volutpat, 
+id malesuada turpis viverra. Nunc lorem mauris, congue at fringilla eget, ornare ac lacus.
 
 Donec viverra leo quis neque suscipit fermentum. Vivamus enim turpis, scelerisque non lacinia id, 
 scelerisque eu justo. Phasellus eleifend eget metus luctus interdum. Donec vehicula metus non ultrices 
 suscipit. Phasellus vel nunc luctus, viverra nisi at, lacinia odio. Nulla tincidunt metus nec aliquet 
 imperdiet. In hac habitasse platea dictumst. Nam non augue augue.
 
+Quisque rutrum quis velit eu ornare. Donec suscipit enim lectus, eget varius purus eleifend eu. 
+Sed tempor ac diam in ornare. Vestibulum non ipsum a purus commodo vulputate. Sed facilisis 
+tristique ultricies. Sed eu ornare nisi. Integer a rhoncus diam. Aliquam erat volutpat. Curabitur lacus nulla, 
+tincidunt commodo congue eget, elementum eu neque. Morbi condimentum fermentum turpis sed ultricies. 
+Pellentesque pretium dolor non mi molestie semper. Sed ultricies efficitur turpis sit amet rhoncus. 
 
+
+# Impact
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Morbi sed risus ut dui semper maximus. Nulla ipsum diam, feugiat a dapibus ut, mollis sit amet odio. 
+Nulla mattis nulla urna, ut scelerisque quam condimentum vel. Pellentesque faucibus augue quam, quis 
+lobortis nisl euismod malesuada. Proin id lacinia augue. Vestibulum semper risus in ex volutpat, 
+id malesuada turpis viverra. Nunc lorem mauris, congue at fringilla eget, ornare ac lacus.
+
+Donec viverra leo quis neque suscipit fermentum. Vivamus enim turpis, scelerisque non lacinia id, 
+scelerisque eu justo. Phasellus eleifend eget metus luctus interdum. Donec vehicula metus non ultrices 
+suscipit. Phasellus vel nunc luctus, viverra nisi at, lacinia odio. Nulla tincidunt metus nec aliquet 
+imperdiet. In hac habitasse platea dictumst. Nam non augue augue.
+
+Quisque rutrum quis velit eu ornare. Donec suscipit enim lectus, eget varius purus eleifend eu. 
+Sed tempor ac diam in ornare. Vestibulum non ipsum a purus commodo vulputate. Sed facilisis 
+tristique ultricies. Sed eu ornare nisi. Integer a rhoncus diam. Aliquam erat volutpat. Curabitur lacus nulla, 
+tincidunt commodo congue eget, elementum eu neque. Morbi condimentum fermentum turpis sed ultricies. 
+Pellentesque pretium dolor non mi molestie semper. Sed ultricies efficitur turpis sit amet rhoncus. 
 
 
 # Bibliography

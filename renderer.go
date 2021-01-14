@@ -34,6 +34,7 @@ func (e *HeaderDivExtension) Extend(m goldmark.Markdown) {
 // HTMLRenderer struct is a renderer.NodeRenderer implementation for the extension.
 type HTMLRenderer struct {
 	headerCnt int
+	hCnt      [6]int
 }
 
 // NewHTMLRenderer builds a new HTMLRenderer with given options and returns it.
@@ -49,22 +50,33 @@ func (r *HTMLRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 
 func (r *HTMLRenderer) renderHeading(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	n := node.(*ast.Heading)
-	if entering {
-		if n.Level == 1 {
-			if r.headerCnt > 0 {
-				_, _ = w.WriteString("</div>")
-				r.headerCnt--
-			}
-			_, _ = w.WriteString(`<div class="container section" `)
-			w.WriteString(">\n")
-			r.headerCnt += 1
-			_, _ = w.WriteString(`<span class="anchor" `)
-			if n.Attributes() != nil {
-				html.RenderAttributes(w, node, html.HeadingAttributeFilter)
-			}
-			_, _ = w.WriteString("></span>\n")
+	lvl := n.Level
 
+	if entering {
+		// close old divs when entering into a new heading.  Each heading needs to close all divs <= than it
+		// i.e. An H1 closes divs for H1, H2, ..., H5
+		// an H3 closes dives for H3, H4, H5
+		for i := lvl; i <= 5; i++ {
+			if r.hCnt[i] > 0 {
+				_, _ = w.WriteString("</div>")
+				r.hCnt[i]--
+			}
 		}
+
+		w.WriteString("\n")
+
+		// Open parent div for this header
+		w.WriteString(`<div class="container section">`)
+		r.hCnt[lvl]++
+
+		// a span for anchor link
+		_, _ = w.WriteString(`<span class="anchor" `)
+		if n.Attributes() != nil {
+			html.RenderAttributes(w, node, html.HeadingAttributeFilter)
+		}
+		_, _ = w.WriteString("></span>\n")
+
+		// Write the header tag
 		_, _ = w.WriteString("<h")
 		_ = w.WriteByte("0123456"[n.Level])
 		if n.Attributes() != nil && n.Level > 1 {
@@ -72,6 +84,7 @@ func (r *HTMLRenderer) renderHeading(w util.BufWriter, source []byte, node ast.N
 		}
 		_ = w.WriteByte('>')
 	} else {
+		// Close the Header tag
 		_, _ = w.WriteString("</h")
 		_ = w.WriteByte("0123456"[n.Level])
 		_, _ = w.WriteString(">\n")
@@ -81,9 +94,15 @@ func (r *HTMLRenderer) renderHeading(w util.BufWriter, source []byte, node ast.N
 
 func (r *HTMLRenderer) renderDocument(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	// If we are finishing the document, and there is an open <div> from an H1 Header, then close it now
-	if !entering && r.headerCnt > 1 {
-		_, _ = w.WriteString("</div>")
-		r.headerCnt--
+	if !entering {
+		// when exiting a document, close all the open divs
+		// that were created by renderHeading
+		for i := 1; i < 6; i++ {
+			if r.hCnt[i] > 1 {
+				_, _ = w.WriteString("</div>")
+				r.hCnt[i]--
+			}
+		}
 	}
 	return ast.WalkContinue, nil
 }
