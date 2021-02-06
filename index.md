@@ -1,5 +1,9 @@
-# Biography
+# Thesis
+ In July of 1960, Jane Goodall started her study on chimpanzees in Gombe National Park, Tanzania.  After 60 years of research on chimpanzee behavior, Jane now travels the world, communicating to everyone she meets about how now is the time to help save the earth, and by doing that, help the chimpanzees. 
 
+<img src="goodall2.jpg" width="50%" class="rounded">
+
+ # Biography
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
 Morbi sed risus ut dui semper maximus. Nulla ipsum diam, feugiat a dapibus ut, mollis sit amet odio. 
 Nulla mattis nulla urna, ut scelerisque quam condimentum vel. Pellentesque faucibus augue quam, quis 
