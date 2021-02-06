@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer"
@@ -66,7 +67,11 @@ func (r *HTMLRenderer) renderHeading(w util.BufWriter, source []byte, node ast.N
 		w.WriteString("\n")
 
 		// Open parent div for this header
-		w.WriteString(`<div class="container section">`)
+        if lvl == 1 {
+            fmt.Fprintf(w, `<div class="container section%v">`, lvl)
+        } else {
+            fmt.Fprintf(w, `<div class="section%v">`, lvl)
+        }
 		r.hCnt[lvl]++
 
 		// a span for anchor link

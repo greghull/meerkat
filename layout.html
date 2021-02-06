@@ -33,7 +33,7 @@
 		</nav>
 
 		<div>
-			<div class="section">
+			<div class="section1">
 				<span class="anchor" id="home"></span>
 				<div class="jumbotron jumbotron-fluid fixed-bg">
 					<div class="mt-5 ml-5 float-left">
@@ -59,20 +59,20 @@
 		 $(document).ready(function(){
 			 $("a").click(function(ev){
 				 // hide all sections
-				 $(".section").hide()
+				 $(".section1").hide()
 				 // show the seciton specified by the hash
 				 $(ev.target.hash).parent().show()
 			 });
 		 });
 
 		 // When loading the page, only show the part specified by the #hash
-		 $(".section").hide()
+		 $(".section1").hide()
 
 		 var hash = window.location.hash;
 		 if(hash) {
 			 $(hash).parent().show()
 		 } else {
-			 $($(".section")[0]).show()
+			 $($(".section1")[0]).show()
 		 }
 		</script>
 
