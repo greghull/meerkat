@@ -106,11 +106,17 @@ tincidunt commodo congue eget, elementum eu neque. Morbi condimentum fermentum t
 Pellentesque pretium dolor non mi molestie semper. Sed ultricies efficitur turpis sit amet rhoncus. 
 
 
-# Bibliography
+# About
 
-- "About Jane." The Jane Goodall Institute. http://www.janegoodall.org/our-story/about-jane/. 03 April 2018.
-- "Jane Goodall Bio – Long narrative version." The Jane Goodall Institute. http://www.janegoodall.org/wp-content/uploads/2016_Bio_Long_JaneGoodall.pdf 03 April 2018.
-- "Jane FAQ’s." The Jane Goodall Institute. http://wiki.janegoodall.org/wiki/Jane_FAQ%27s#FAQ1. 03 April 2018.
-- "Jane’s Early Years." The Jane Goodall Institute, 02 June 2016. http://wiki.janegoodall.org/wiki/Jane%27s_Early_Years. 03 April 2018.
-- Tullis, Paul. "Jane Goodall is Still Wild at Heart." The New York Times, 13 March 2015. https://www.nytimes.com/2015/03/15/magazine/jane-goodall-is-still-wild-at-heart.html. 03 April 2018.
-- Yuan, Jada. "Jane Goodall on Her New Doc and Her Love Story in Africa." Vulture, 23 October 2017. http://www.vulture.com/2017/10/jane-goodall-interview.html. 03 April 2018.
+Here are links to the PDF Process Paper and PDF Annoted Bibliography.
+
+[My Process Paper][3]
+
+[Annoted Bibliography][2]
+
+
+[2]:bibliography.pdf
+[3]:process_paper.pdf
+
+<img src="goodall3.jpg" width="50%" class="rounded">
+
