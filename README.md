@@ -1,11 +1,15 @@
 # Meerkat
 
+Created for Charlie's school project on Jane Goodall.
+
 Meerkat translates Markdown files to HTML files, using a Go Template.
 At each H1, H2, ..., H5 element, Structure is added to the HTML output to accomodate anchor 
 links and toggling the visibility of sections of the Document.
 
 A single page website can be produced from a single Markdown file that also has nice fall-back
 behavior when Javascript is not present.
+
+The files in this repository were used to create https://www.chimps.website
 
 
 
